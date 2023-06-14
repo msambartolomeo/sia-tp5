@@ -70,7 +70,7 @@ class MultiLayerPerceptron:
 
             # #delta_i = mu * output_size
             # #feedforward_output[-1] = #hidden_data = mu * (hidden_size + 1)
-            delta_W.append(self._optimization_method.adjust(delta_i, feedforward_output[-1]))
+            delta_W.append(self._optimization_method.adjust(delta_i, feedforward_output[-1], -1, epoch))
             # #delta_W =  (#hidden_size + 1) * #output_size
 
             for i in reversed(range(len(self._layers) - 1)):
@@ -83,7 +83,7 @@ class MultiLayerPerceptron:
                 derivatives = self._activation_function.d_evaluate(feedforward_data[i + 1])  # mu * hidden_size
                 delta_i = error * derivatives  # mu * hidden_size
                 # #feedforward[i] = mu * (previous_hidden_size + 1) ; delta_i = mu * hidden_size
-                delta_W.append(self._optimization_method.adjust(delta_i, feedforward_output[i]))
+                delta_W.append(self._optimization_method.adjust(delta_i, feedforward_output[i], i, epoch))
                 # Me libero del mu (estoy "sumando" todos los delta_w)
 
             # Calculo w = w + dw

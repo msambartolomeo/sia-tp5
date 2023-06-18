@@ -1,8 +1,11 @@
+import numpy as np
+
 import utils
 from src.multi_layer_perceptron import MultiLayerPerceptron
 from data.font import FONT
 
-INPUT = [[pixel for line in letter for pixel in line] for letter in FONT]
+INPUT = np.array([[pixel for line in letter for pixel in line] for letter in FONT])
+INPUT_SIZE = INPUT.shape[1] # 35
 
 
 def main():
@@ -12,18 +15,18 @@ def main():
     optimization_method = utils.get_optimization_method(settings)
     epochs = utils.get_epochs(settings)
 
-    input_size = len(INPUT[0]) # 35
-
-    mlp = MultiLayerPerceptron([input_size, 2, input_size],
+    mlp = MultiLayerPerceptron([INPUT_SIZE, 2, INPUT_SIZE],
                                epochs,
                                cut_condition,
                                activation_method,
                                optimization_method)
     print(f"Training finished in {len(mlp.train_batch(INPUT, INPUT))} epochs.")
 
-    ans = perceptron.predict(X)
-    for test in range(X.shape[0]):
-        print(f"{X[test][0]} & {X[test][1]} = {ans[test]}")
+    ans = mlp.predict(INPUT)
+    for test in range(INPUT.shape[0]):
+        print(f"{INPUT[test]}\n{ans[test]}\n----------------------------------------------------\n")
+
+    mlp.save("data/e1a.mlp")
 
 
 if __name__ == "__main__":

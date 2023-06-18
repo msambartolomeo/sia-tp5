@@ -1,3 +1,4 @@
+import pickle
 from typing import List
 
 import numpy as np
@@ -92,3 +93,12 @@ class MultiLayerPerceptron:
                 self._layers[i].neurons = np.add(self._layers[i].neurons, delta_W[-(i + 1)])
 
         return error_history
+
+    def save(self, file_name: str):
+        with open(file_name, "wb") as outfile:
+            pickle.dump(self, outfile)
+
+    @staticmethod
+    def load(file_name: str):
+        with open(file_name, "rb") as infile:
+            return pickle.load(infile)

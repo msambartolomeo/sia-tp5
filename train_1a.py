@@ -1,5 +1,9 @@
 import utils
 from src.multi_layer_perceptron import MultiLayerPerceptron
+from data.font import FONT
+
+INPUT = [[pixel for line in letter for pixel in line] for letter in FONT]
+
 
 def main():
     settings = utils.get_settings()

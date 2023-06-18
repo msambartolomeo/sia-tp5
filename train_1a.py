@@ -12,12 +12,14 @@ def main():
     optimization_method = utils.get_optimization_method(settings)
     epochs = utils.get_epochs(settings)
 
-    mlp = MultiLayerPerceptron([2, 2, 1],
+    input_size = len(INPUT[0]) # 35
+
+    mlp = MultiLayerPerceptron([input_size, 2, input_size],
                                epochs,
                                cut_condition,
                                activation_method,
                                optimization_method)
-    print(f"Training finished in {len(mlp.train_batch(X, EXPECTED))} epochs.")
+    print(f"Training finished in {len(mlp.train_batch(INPUT, INPUT))} epochs.")
 
     ans = perceptron.predict(X)
     for test in range(X.shape[0]):

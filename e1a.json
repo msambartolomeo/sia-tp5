@@ -1,0 +1,15 @@
+{
+  "activation_function": {
+    "function": "sigmoid",
+    "beta": 0.3
+  },
+  "cut_condition": {
+    "condition": "mse",
+    "eps": 0.001
+  },
+  "optimization_method": {
+    "method": "gradient",
+    "learning_rate": 0.1
+  },
+  "epochs": 2500
+}

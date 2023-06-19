@@ -1,10 +1,10 @@
 {
   "activation_function": {
-    "function": "sigmoid",
+    "function": "step",
     "beta": 0.3
   },
   "cut_condition": {
-    "condition": "mse",
+    "condition": "one_wrong_pixel",
     "eps": 0.001
   },
   "optimization_method": {

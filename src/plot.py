@@ -50,3 +50,7 @@ def plot_font(data):
             aux[row][col] = pixel
 
     plot_grid(aux, grid=True)
+
+def plot_scatter(x, y, labels=None):
+    plt.scatter(x, y)
+    plt.show()

@@ -1,5 +1,12 @@
+import os
+
 import numpy as np
 from matplotlib import pyplot as plt, ticker
+
+OUTPUT_DIR = "plots/"
+
+if not os.path.exists(OUTPUT_DIR):
+    os.mkdir(OUTPUT_DIR)
 
 
 def plot_letter_pattern(data):

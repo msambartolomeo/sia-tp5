@@ -1,11 +1,11 @@
 import numpy as np
 
 import utils
-from src.multi_layer_perceptron import MultiLayerPerceptron
 from data.font import FONT
+from src.multi_layer_perceptron import MultiLayerPerceptron
 
 INPUT = np.array([[pixel for line in letter for pixel in line] for letter in FONT])
-INPUT_SIZE = INPUT.shape[1] # 35
+INPUT_SIZE = INPUT.shape[1]  # 35
 
 
 def main():

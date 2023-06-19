@@ -3,7 +3,8 @@ import sys
 
 from src.activation_method import ActivationMethod, StepActivationFunction, LogisticActivationFunction, \
     TangentActivationFunction, IdentityActivationFunction, SigmoidActivationFunction
-from src.cut_condition import CutCondition, AccuracyCutCondition, AbsoluteValueCutCondition, MSECutCondition
+from src.cut_condition import CutCondition, AccuracyCutCondition, AbsoluteValueCutCondition, MSECutCondition, \
+    OneWrongPixelCutCondition
 from src.optimization_method import OptimizationMethod, MomentumOptimization, GradientDescentOptimization
 
 
@@ -49,6 +50,10 @@ def get_cut_condition(settings) -> CutCondition:
         case "mse":
             eps = settings["cut_condition"]["eps"]
             return MSECutCondition(eps=eps)
+        case "one_wrong_pixel":
+            return OneWrongPixelCutCondition()
+        case _:
+            raise ValueError("Unsupported cut condition: " + condition)
 
 
 def get_optimization_method(settings) -> OptimizationMethod:

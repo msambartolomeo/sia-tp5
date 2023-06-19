@@ -1,7 +1,7 @@
 {
   "activation_function": {
-    "function": "step",
-    "beta": 0.3
+    "function": "tangent",
+    "beta": 0.5
   },
   "cut_condition": {
     "condition": "one_wrong_pixel",
@@ -15,5 +15,5 @@
     "beta_2": 0.999,
     "epsilon": 1e-8
   },
-  "epochs": 5000000
+  "epochs": 100000
 }

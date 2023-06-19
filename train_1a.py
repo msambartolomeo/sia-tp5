@@ -17,9 +17,9 @@ def main():
     optimization_method = utils.get_optimization_method(settings)
     epochs = utils.get_epochs(settings)
 
-    mlp = MultiLayerPerceptron([INPUT_SIZE, 10, 20, 10,
+    mlp = MultiLayerPerceptron([INPUT_SIZE, 25, 25, 25, 25,
                                             2,
-                                            10, 20, 10, INPUT_SIZE],
+                                            25, 25, 25, 25, INPUT_SIZE],
                                epochs,
                                cut_condition,
                                activation_method,
@@ -27,6 +27,10 @@ def main():
     print(f"Training finished in {len(mlp.train_batch(INPUT, INPUT))} epochs.")
 
     ans = mlp.predict(INPUT)
+    for i in range(len(ans)):
+        print(f"{INPUT[i]}\n{ans[i]}\n----------------------------------------------------\n")
+        ans[i] = [1 if num >= 0 else -1 for num in ans[i]]
+
     for test in range(INPUT.shape[0]):
         count = 0
         for i in range(len(ans[test])):

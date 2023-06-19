@@ -51,6 +51,10 @@ def plot_font(data):
 
     plot_grid(aux, grid=True)
 
-def plot_scatter(x, y, labels=None):
-    plt.scatter(x, y)
+
+def plot_scatter(x, y, labels):
+    fig, ax = plt.subplots()
+    ax.scatter(x, y)
+    for i in range(len(x)):
+        ax.annotate(labels[i], (x[i], y[i]))
     plt.show()

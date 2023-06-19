@@ -5,7 +5,6 @@ from src.autoencoder import Autoencoder
 from src.plot import plot_letter_pattern, plot_font
 
 INPUT = np.array([[pixel for line in letter for pixel in line] for letter in FONT])
-INPUT_SIZE = INPUT.shape[1]  # 35
 
 
 def main():

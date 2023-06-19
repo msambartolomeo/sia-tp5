@@ -4,6 +4,7 @@ import numpy as np
 
 import utils
 from data.font import FONT
+from src.autoencoder import Autoencoder
 from src.multi_layer_perceptron import MultiLayerPerceptron
 
 INPUT = np.array([[pixel for line in letter for pixel in line] for letter in FONT])
@@ -17,16 +18,16 @@ def main():
     optimization_method = utils.get_optimization_method(settings)
     epochs = utils.get_epochs(settings)
 
-    mlp = MultiLayerPerceptron([INPUT_SIZE, 25, 25, 25, 25,
+    ae = Autoencoder([INPUT_SIZE, 25, 25, 25, 25,
                                             2,
                                             25, 25, 25, 25, INPUT_SIZE],
                                epochs,
                                cut_condition,
                                activation_method,
                                optimization_method)
-    print(f"Training finished in {len(mlp.train_batch(INPUT, INPUT))} epochs.")
+    print(f"Training finished in {len(ae.train_batch(INPUT, INPUT))} epochs.")
 
-    ans = mlp.predict(INPUT)
+    ans = ae.predict(INPUT)
     for i in range(len(ans)):
         print(f"{INPUT[i]}\n{ans[i]}\n----------------------------------------------------\n")
         ans[i] = [1 if num >= 0 else -1 for num in ans[i]]
@@ -39,7 +40,7 @@ def main():
 
         print(f" - {count}")
 
-    mlp.save("data/e1a.mlp")
+    ae.save("data/e1a.mlp")
 
 
 if __name__ == "__main__":

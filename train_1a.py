@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 import utils
@@ -15,7 +17,9 @@ def main():
     optimization_method = utils.get_optimization_method(settings)
     epochs = utils.get_epochs(settings)
 
-    mlp = MultiLayerPerceptron([INPUT_SIZE, 2, INPUT_SIZE],
+    mlp = MultiLayerPerceptron([INPUT_SIZE, 10, 20, 10,
+                                            2,
+                                            10, 20, 10, INPUT_SIZE],
                                epochs,
                                cut_condition,
                                activation_method,
@@ -24,7 +28,12 @@ def main():
 
     ans = mlp.predict(INPUT)
     for test in range(INPUT.shape[0]):
-        print(f"{INPUT[test]}\n{ans[test]}\n----------------------------------------------------\n")
+        count = 0
+        for i in range(len(ans[test])):
+            if INPUT[test][i] != ans[test][i]:
+                count += 1
+
+        print(f" - {count}")
 
     mlp.save("data/e1a.mlp")
 

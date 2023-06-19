@@ -5,7 +5,8 @@ from src.activation_method import ActivationMethod, StepActivationFunction, Logi
     TangentActivationFunction, IdentityActivationFunction, SigmoidActivationFunction
 from src.cut_condition import CutCondition, AccuracyCutCondition, AbsoluteValueCutCondition, MSECutCondition, \
     OneWrongPixelCutCondition
-from src.optimization_method import OptimizationMethod, MomentumOptimization, GradientDescentOptimization
+from src.optimization_method import OptimizationMethod, MomentumOptimization, GradientDescentOptimization, \
+    AdamOptimization
 
 
 def get_settings():
@@ -66,6 +67,12 @@ def get_optimization_method(settings) -> OptimizationMethod:
             lr = settings["optimization_method"]["learning_rate"]
             alpha = settings["optimization_method"]["alpha"]
             return MomentumOptimization(learning_rate=lr, alpha=alpha)
+        case "adam":
+            alpha = settings["optimization_method"]["alpha"]
+            beta_1 = settings["optimization_method"]["beta_1"]
+            beta_2 = settings["optimization_method"]["beta_2"]
+            epsilon = settings["optimization_method"]["epsilon"]
+            return AdamOptimization(alpha=alpha, beta_1=beta_1, beta_2=beta_2, epsilon=epsilon)
         case _:
             raise ValueError("Optimization method not supported: " + method)
 

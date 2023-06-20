@@ -2,7 +2,7 @@ import numpy as np
 
 import utils
 from data.font import FONT
-from src.activation_method import TangentActivationFunction
+from src.activation_method import TangentActivationFunction, IdentityActivationFunction
 from src.autoencoder import Autoencoder
 from src.cut_condition import OneWrongPixelCutCondition, FalseCutCondition
 from src.optimization_method import AdamOptimization
@@ -22,10 +22,16 @@ CONFIGURATIONS = [
         "optimization_method": AdamOptimization(),
         "inner_architecture": [10],
     },
+    {
+        "name": "Identity, Adam, [25, 25, 25]",
+        "activation_method": IdentityActivationFunction(),
+        "optimization_method": AdamOptimization(),
+        "inner_architecture": [25, 25, 25],
+    },
 ]
 # Shared by all experiments
 CUT_CONDITION = FalseCutCondition()
-EPOCHS = 1000
+EPOCHS = 100000
 
 # Relative to the problem
 LATENT_DIMENSION = 2
@@ -35,7 +41,7 @@ INPUT_SIZE = INPUT.shape[1]  # 35
 
 def main():
     MultiErrorVsEpochTestPlotter("e1a2_font.png",
-                                 f"Text1",
+                                 f"Different configurations: test count = 10, all to max epochs allowed",
                                  "Epoch",
                                  "Error(MSE)",
                                  "Conf",

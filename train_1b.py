@@ -4,6 +4,7 @@ import utils
 from data.font import FONT
 from src.activation_method import StepActivationFunction
 from src.autoencoder import Autoencoder
+from src.plot import plot_font
 
 LATENT_DIMENSION = 2
 
@@ -34,6 +35,7 @@ def main():
     ans = ae.predict(NOISY_INPUT_TEST)
     ans = StepActivationFunction().evaluate(ans)
 
+
     for test in range(INPUT.shape[0]):
         count = 0
         for i in range(len(ans[test])):
@@ -41,6 +43,11 @@ def main():
                 count += 1
 
         print(f" - {count}")
+
+    plot_font(NOISY_INPUT)
+    plot_font(INPUT)
+    plot_font(NOISY_INPUT_TEST)
+    plot_font(ans)
 
     ae.save("data/e1b.mlp")
 

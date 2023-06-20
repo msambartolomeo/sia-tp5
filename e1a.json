@@ -1,4 +1,5 @@
 {
+  "architecture": [25, 25, 25, 25],
   "activation_function": {
     "function": "tangent",
     "beta": 0.5

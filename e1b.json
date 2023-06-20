@@ -16,6 +16,6 @@
     "beta_2": 0.999,
     "epsilon": 1e-8
   },
-  "epochs": 1000000,
+  "epochs": 50000,
   "noise": 0.1
 }

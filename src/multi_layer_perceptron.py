@@ -30,6 +30,9 @@ class MultiLayerPerceptron:
         for i in range(len(architecture) - 1):
             self._layers.append(Layer(np.random.uniform(-1, 1, (architecture[i] + 1, architecture[i + 1]))))
 
+        self._feedforward_data = []
+        self._feedforward_output = []
+
     def predict(self, data: ndarray[float]) -> ndarray[float]:
         results = data
         for i in range(len(self._layers)):
@@ -42,31 +45,28 @@ class MultiLayerPerceptron:
         return results
 
     def feedforward(self, data):
-        feedforward_data = [data]
+        self._feedforward_data = [data]
         results = data
-        feedforward_output = []
+        self._feedforward_output = []
         for i in range(len(self._layers)):
             results = np.insert(results, 0, 1, axis=1)
-            feedforward_output.append(results)
+            self._feedforward_output.append(results)
             # results = mu x hidden_size + 1, #layers[i] = (hidden_size + 1) x next_hidden_size
             h = np.dot(results, self._layers[i].neurons)
             # h = mu x next_hidden_size
-            feedforward_data.append(h)
+            self._feedforward_data.append(h)
             results = self._activation_function.evaluate(h)
 
-        return feedforward_output, feedforward_data, results
+        return results
 
-    def backpropagation(self, feedforward_output, feedforward_data, error):
-        derivatives = self._activation_function.d_evaluate(feedforward_data[-1])  # mu * output_size
+    def backpropagation(self, error):
+        derivatives = self._activation_function.d_evaluate(self._feedforward_data[-1])  # mu * output_size
         delta_i = error * derivatives  # mu * output_size, elemento a elemento
-
-        gradients = [gradient(delta_i, feedforward_output[-1])]
 
         # #delta_i = mu * output_size
         # #feedforward_output[-1] = #hidden_data = mu * (hidden_size + 1)
-        # delta_W.append(
-        #     self._optimization_method.adjust(delta_i, feedforward_output[-1], len(feedforward_output) - 1, epoch))
-        # #delta_W =  (#hidden_size + 1) * #output_size
+        gradients = [gradient(delta_i, self._feedforward_output[-1])]
+        # #gradients =  (#hidden_size + 1) * #output_size
 
         for i in reversed(range(len(self._layers) - 1)):
             # delta_w tiene que tener la suma de todos los delta_w para cada iteracion para ese peso
@@ -75,11 +75,10 @@ class MultiLayerPerceptron:
             # mu * (hidden_size + 1 {bias_layer} - 1)  == mu * hidden_size
 
             # Call _optimization_method #
-            derivatives = self._activation_function.d_evaluate(feedforward_data[i + 1])  # mu * hidden_size
+            derivatives = self._activation_function.d_evaluate(self._feedforward_data[i + 1])  # mu * hidden_size
             delta_i = error * derivatives  # mu * hidden_size
             # #feedforward[i] = mu * (previous_hidden_size + 1) ; delta_i = mu * hidden_size
-            gradients.append(gradient(delta_i, feedforward_output[i]))
-            # delta_W.append(self._optimization_method.adjust(delta_i, feedforward_output[i], i, epoch))
+            gradients.append(gradient(delta_i, self._feedforward_output[i]))
             # Me libero del mu (estoy "sumando" todos los delta_w)
 
         gradients.reverse()
@@ -89,7 +88,7 @@ class MultiLayerPerceptron:
         # #initial_data = mu x initial_size, #expected = mu x output_size
         error_history = []
         for epoch in tqdm(range(self._epochs)):
-            feedforward_output, feedforward_data, results = self.feedforward(data)
+            results = self.feedforward(data)
 
             error = expected - results  # mu * output_size
             # ver calculo del error con llamando a d_error #
@@ -97,7 +96,7 @@ class MultiLayerPerceptron:
             if self._cut_condition.is_finished(error):
                 break
 
-            gradients = self.backpropagation(feedforward_output, feedforward_data, error)
+            gradients = self.backpropagation(error)
 
             # Calculo w = w + dw
             for i in range(len(self._layers)):

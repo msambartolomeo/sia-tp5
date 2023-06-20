@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import List
 
 from src.activation_method import ActivationMethod, StepActivationFunction, LogisticActivationFunction, \
     TangentActivationFunction, IdentityActivationFunction, SigmoidActivationFunction
@@ -87,3 +88,7 @@ def get_noise(settings) -> float:
 
 def get_testing_size(settings) -> int:
     return settings["testing_size"]
+
+
+def get_architecture(settings) -> List[int]:
+    return settings["architecture"]

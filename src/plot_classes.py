@@ -15,10 +15,12 @@ from src.multi_layer_perceptron import MultiLayerPerceptron
 from src.optimization_method import GradientDescentOptimization, MomentumOptimization
 
 
-OUTPUT_DIR = "figs/"
-TEST_COUNT = 100
-MAX_EPOCHS = 1000
-LEARNING_RATE = 0.01
+OUTPUT_DIR = "plots/"
+
+if not os.path.exists(OUTPUT_DIR):
+    os.mkdir(OUTPUT_DIR)
+
+TEST_COUNT = 10
 
 
 class TestPlotter(ABC):
@@ -33,6 +35,8 @@ class TestPlotter(ABC):
             self._add_data(data, test())
 
         data = self._post_process(data)
+
+        plt.show()
 
         self._save_plot(data)
 

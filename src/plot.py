@@ -8,7 +8,7 @@ GRID_HEIGHT = 4
 LETTER_WIDTH = 5
 LETTER_HEIGHT = 7
 
-OUTPUT_DIR = "../plots/"
+OUTPUT_DIR = "plots/"
 
 if not os.path.exists(OUTPUT_DIR):
     os.mkdir(OUTPUT_DIR)

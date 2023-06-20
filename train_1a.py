@@ -1,11 +1,10 @@
-import math
-
 import numpy as np
 
 import utils
 from data.font import FONT
 from src.autoencoder import Autoencoder
-from src.multi_layer_perceptron import MultiLayerPerceptron
+
+LATENT_DIMENSION = 2
 
 INPUT = np.array([[pixel for line in letter for pixel in line] for letter in FONT])
 INPUT_SIZE = INPUT.shape[1]  # 35
@@ -17,14 +16,15 @@ def main():
     activation_method = utils.get_activation_function(settings)
     optimization_method = utils.get_optimization_method(settings)
     epochs = utils.get_epochs(settings)
+    inner_architecture = utils.get_architecture(settings)
+    architecture = [INPUT_SIZE] + inner_architecture + [LATENT_DIMENSION] + list(reversed(inner_architecture)) + [
+        INPUT_SIZE]
 
-    ae = Autoencoder([INPUT_SIZE, 25, 25, 25, 25,
-                                            2,
-                                            25, 25, 25, 25, INPUT_SIZE],
-                               epochs,
-                               cut_condition,
-                               activation_method,
-                               optimization_method)
+    ae = Autoencoder(architecture,
+                     epochs,
+                     cut_condition,
+                     activation_method,
+                     optimization_method)
     print(f"Training finished in {len(ae.train_batch(INPUT, INPUT))} epochs.")
 
     ans = ae.predict(INPUT)

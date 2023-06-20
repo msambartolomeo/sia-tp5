@@ -2,10 +2,11 @@ import numpy as np
 
 import utils
 from data.font import FONT
-from src.activation_method import TangentActivationFunction, IdentityActivationFunction
+from src.activation_method import TangentActivationFunction
 from src.autoencoder import Autoencoder
 from src.cut_condition import OneWrongPixelCutCondition, FalseCutCondition
 from src.optimization_method import AdamOptimization
+from src.plot import plot_errors
 from src.plot_classes import MultiErrorVsEpochTestPlotter
 
 # Configurations for the experiments
@@ -17,21 +18,16 @@ CONFIGURATIONS = [
         "inner_architecture": [25, 25, 25, 25],
     },
     {
-        "name": "Tangent, Adam, [10]",
+        "name": "Tangent, Adam, []",
         "activation_method": TangentActivationFunction(0.5),
         "optimization_method": AdamOptimization(),
-        "inner_architecture": [10],
-    },
-    {
-        "name": "Identity, Adam, [25, 25, 25]",
-        "activation_method": IdentityActivationFunction(),
-        "optimization_method": AdamOptimization(),
-        "inner_architecture": [25, 25, 25],
+        "inner_architecture": [],
     },
 ]
 # Shared by all experiments
 CUT_CONDITION = FalseCutCondition()
-EPOCHS = 100000
+EPOCHS = 10000
+REPETITIONS = 5
 
 # Relative to the problem
 LATENT_DIMENSION = 2
@@ -40,23 +36,35 @@ INPUT_SIZE = INPUT.shape[1]  # 35
 
 
 def main():
-    MultiErrorVsEpochTestPlotter("e1a2_font.png",
-                                 f"Different configurations: test count = 10, all to max epochs allowed",
-                                 "Epoch",
-                                 "Error(MSE)",
-                                 "Conf",
-                                 [conf["name"] for conf in CONFIGURATIONS]
-                                 ).plot(
-        (lambda: [
-            Autoencoder([INPUT_SIZE] + conf["inner_architecture"] + [LATENT_DIMENSION] + list(reversed(conf["inner_architecture"])) + [INPUT_SIZE],
-                        EPOCHS,
-                        CUT_CONDITION,
-                        conf["activation_method"],
-                        conf["optimization_method"]
-                        ).train_batch(INPUT, INPUT)
+    experiment_mean = []
+    experiment_std = []
 
-            for conf in CONFIGURATIONS]
-         ))
+    for configuration in CONFIGURATIONS:
+        experiment_errors = []
+        for _ in range(REPETITIONS):
+            activation_method = configuration["activation_method"]
+            optimization_method = configuration["optimization_method"]
+            inner_architecture = configuration["inner_architecture"]
+            architecture = [INPUT_SIZE] + inner_architecture + [LATENT_DIMENSION] + list(reversed(inner_architecture)) + [
+                INPUT_SIZE]
+
+            ae = Autoencoder(architecture,
+                             EPOCHS,
+                             CUT_CONDITION,
+                             activation_method,
+                             optimization_method)
+            error_history = ae.train_batch(INPUT, INPUT)
+            experiment_errors.append(error_history)
+        curr_mean = []
+        curr_std = []
+        for epoch in range(EPOCHS):
+            curr_mean.append(np.mean([experiment_errors[exp][epoch] for exp in range(REPETITIONS)]))
+            curr_std.append(np.std([experiment_errors[exp][epoch] for exp in range(REPETITIONS)]))
+        experiment_mean.append(curr_mean)
+        experiment_std.append(curr_std)
+
+    print([conf["name"] for conf in CONFIGURATIONS])
+    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder: Avg. of 5, full epoch count", "epoch", "MSE(e)")
 
 
 if __name__ == "__main__":

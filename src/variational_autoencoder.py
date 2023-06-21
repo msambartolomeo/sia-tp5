@@ -1,9 +1,25 @@
 import copy
 
+import numpy as np
+from numpy import ndarray
+from tqdm import tqdm
+
 from src.activation_method import ActivationMethod
 from src.cut_condition import CutCondition
 from src.multi_layer_perceptron import MultiLayerPerceptron
 from src.optimization_method import OptimizationMethod
+
+
+def loss_function(mean, std, data, result):
+    rec = 0.5 * np.mean((data - result) ** 2)
+    kl = -0.5 * np.sum(1 + std - mean ** 2 - np.exp(std))
+
+    return rec + kl
+
+
+def reparametrization_trick(mean: ndarray[float], std: ndarray[float]) -> tuple[ndarray[float], float]:
+    eps = np.random.standard_normal()
+    return eps * std + mean, eps
 
 
 class VariationalAutoencoder:
@@ -24,3 +40,38 @@ class VariationalAutoencoder:
         decoder_architecture.append(input_size)
         self._decoder = MultiLayerPerceptron(decoder_architecture, epochs, cut_condition, activation_method,
                                              copy.deepcopy(optimization_method))
+
+    def train(self, data):
+        for epoch in tqdm(range(self._epochs)):
+            # NOTE: Feedforward
+            result = self._encoder.feedforward(data)
+
+            mean = result[:len(result) // 2]
+            std = result[len(result) // 2:]
+
+            z, eps = reparametrization_trick(mean, std)
+
+            result = self._decoder.feedforward(z)
+
+            loss = loss_function(mean, std, data, result)
+            # TODO: add cut condition (?)
+
+            # NOTE: Decoder Backpropagation for reconstruction
+            dL_dX = data - result
+            decoder_reconstruction_gradients, last_delta = self._decoder.backpropagation(dL_dX)
+
+            # NOTE: Encoder backpropagation for reconstruction
+            dz_dm = 1
+            dz_dv = eps
+            encoder_reconstruction_error = np.concatenate(last_delta * dz_dm, last_delta * dz_dv)
+            encoder_reconstruction_gradients, _ = self._encoder.backpropagation(encoder_reconstruction_error)
+
+            # NOTE: Encoder backpropagation for regularization
+            dL_dm = mean
+            dL_dv = 0.5 * (np.exp(std) - 1)
+            encoder_loss_error = np.concatenate(dL_dm, dL_dv)
+            encoder_loss_gradients, _ = self._encoder.backpropagation(encoder_loss_error)
+
+            # NOTE: update weights with gradients
+            self._encoder.update_weights(encoder_reconstruction_gradients + encoder_loss_gradients, epoch)
+            self._decoder.update_weights(decoder_reconstruction_gradients, epoch)

@@ -5,20 +5,44 @@ from data.font import FONT
 from src.activation_method import TangentActivationFunction
 from src.autoencoder import Autoencoder
 from src.cut_condition import OneWrongPixelCutCondition, FalseCutCondition
-from src.optimization_method import AdamOptimization
+from src.optimization_method import AdamOptimization, MomentumOptimization
 from src.plot import plot_errors
 from src.plot_classes import MultiErrorVsEpochTestPlotter
 
 # Configurations for the experiments
 CONFIGURATIONS = [
     {
-        "name": "Tangent, Adam, [25, 25, 25, 25]",
+        "name": "Adam, [25, 25, 25, 25]",
         "activation_method": TangentActivationFunction(0.5),
         "optimization_method": AdamOptimization(),
         "inner_architecture": [25, 25, 25, 25],
     },
     {
-        "name": "Tangent, Adam, []",
+        "name": "Momentum, [25, 25, 25, 25]",
+        "activation_method": TangentActivationFunction(0.5),
+        "optimization_method": MomentumOptimization(),
+        "inner_architecture": [25, 25, 25, 25],
+    },
+    {
+        "name": "Adam, [25, 25, 25]",
+        "activation_method": TangentActivationFunction(0.5),
+        "optimization_method": AdamOptimization(),
+        "inner_architecture": [25, 25, 25],
+    },
+    {
+        "name": "Adam, [10, 10]",
+        "activation_method": TangentActivationFunction(0.5),
+        "optimization_method": AdamOptimization(),
+        "inner_architecture": [10, 10],
+    },
+    {
+        "name": "Adam, [18]",
+        "activation_method": TangentActivationFunction(0.5),
+        "optimization_method": AdamOptimization(),
+        "inner_architecture": [18],
+    },
+    {
+        "name": "Adam, []",
         "activation_method": TangentActivationFunction(0.5),
         "optimization_method": AdamOptimization(),
         "inner_architecture": [],
@@ -63,7 +87,7 @@ def main():
         experiment_mean.append(curr_mean)
         experiment_std.append(curr_std)
 
-    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder: Avg. of 5, full epoch count", "epoch", "MSE(e)")
+    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder(tanh(beta=0.5)): avg. of 5, full epoch count", "epoch", "MSE(e)")
 
 
 if __name__ == "__main__":

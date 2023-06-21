@@ -58,7 +58,7 @@ class VariationalAutoencoder:
 
             # NOTE: Decoder Backpropagation for reconstruction
             dL_dX = data - result
-            decoder_reconstruction_gradients, last_delta = self._decoder.backpropagation(dL_dX)
+            decoder_gradients, last_delta = self._decoder.backpropagation(dL_dX)
 
             # NOTE: Encoder backpropagation for reconstruction
             dz_dm = 1
@@ -73,5 +73,9 @@ class VariationalAutoencoder:
             encoder_loss_gradients, _ = self._encoder.backpropagation(encoder_loss_error)
 
             # NOTE: update weights with gradients
-            self._encoder.update_weights(encoder_reconstruction_gradients + encoder_loss_gradients, epoch)
-            self._decoder.update_weights(decoder_reconstruction_gradients, epoch)
+            encoder_gradients = []
+            for g1, g2 in zip(encoder_loss_gradients, encoder_reconstruction_gradients):
+                encoder_gradients.append(np.sum(g1, g2))
+
+            self._encoder.update_weights(encoder_gradients, epoch)
+            self._decoder.update_weights(decoder_gradients, epoch)

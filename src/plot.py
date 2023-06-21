@@ -14,7 +14,7 @@ if not os.path.exists(OUTPUT_DIR):
     os.mkdir(OUTPUT_DIR)
 
 
-def plot_grid(data, grid = False):
+def plot_grid(data, grid=False, minor_width=3):
     fig, ax = plt.subplots()
     ax.spines[:].set_visible(False)
     if grid:
@@ -23,7 +23,7 @@ def plot_grid(data, grid = False):
     else:
         ax.set_xticks(np.arange(data.shape[1] + 1) - .5, minor=True)
         ax.set_yticks(np.arange(data.shape[0] + 1) - .5, minor=True)
-    ax.grid(which="minor", color="tab:gray", linestyle='-', linewidth=3)
+    ax.grid(which="minor", color="tab:gray", linestyle='-', linewidth=minor_width)
     ax.tick_params(which="minor", bottom=False, left=False)
     ax.tick_params(left=False, bottom=False)
     plt.style.use('grayscale')
@@ -52,6 +52,19 @@ def plot_font(data):
     plot_grid(aux, grid=True)
 
 
+def plot_latent_grid(data, height, width):
+    row_count = LETTER_HEIGHT * height
+    col_count = LETTER_WIDTH * width
+    aux = np.zeros([row_count, col_count])
+    for row in range(row_count):
+        for col in range(col_count):
+            letter = data[col // LETTER_WIDTH + row // LETTER_HEIGHT * width]
+            pixel = letter[col % LETTER_WIDTH + (row % LETTER_HEIGHT) * LETTER_WIDTH]
+            aux[row][col] = pixel
+
+    plot_grid(aux, grid=True, minor_width=1)
+
+
 def plot_scatter(x, y, labels):
     fig, ax = plt.subplots()
     ax.scatter(x, y)
@@ -75,4 +88,8 @@ def plot_errors(mean, std, labels, title, xlabel, ylabel):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.grid()
+    current_size = fig.get_size_inches()
+    new_size = (current_size[0] * 1.5, current_size[1] * 1.5)
+    fig.set_size_inches(new_size)
+    ax.set_position([0.1, 0.1, 0.8, 0.8])
     plt.show()

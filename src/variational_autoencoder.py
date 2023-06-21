@@ -30,6 +30,10 @@ class VariationalAutoencoder:
                  optimization_method: OptimizationMethod):
         self._epochs = epochs
 
+        self._input_size = input_size
+        self._latent_size = latent_size
+        self._last_delta_size = decoder_architecture[0]
+
         cut_condition = FalseCutCondition()
 
         encoder_architecture.insert(0, input_size)
@@ -48,8 +52,8 @@ class VariationalAutoencoder:
             # NOTE: Feedforward
             result = self._encoder.feedforward(data)
 
-            mean = result[:len(result) // 2]
-            std = result[len(result) // 2:]
+            mean = result[:, :result.shape[1] // 2]
+            std = result[:, result.shape[1] // 2:]
 
             z, eps = reparametrization_trick(mean, std)
 
@@ -65,21 +69,23 @@ class VariationalAutoencoder:
             decoder_gradients, last_delta = self._decoder.backpropagation(dL_dX)
 
             # NOTE: Encoder backpropagation for reconstruction
-            dz_dm = 1
-            dz_dv = eps
-            encoder_reconstruction_error = np.concatenate(last_delta * dz_dm, last_delta * dz_dv)
+            dz_dm = np.ones([self._last_delta_size, self._latent_size])
+            dz_dv = eps * np.ones([self._last_delta_size, self._latent_size])
+            mean_error = np.dot(last_delta, dz_dm)
+            std_error = np.dot(last_delta, dz_dv)
+            encoder_reconstruction_error = np.concatenate((mean_error, std_error), axis=1)
             encoder_reconstruction_gradients, _ = self._encoder.backpropagation(encoder_reconstruction_error)
 
             # NOTE: Encoder backpropagation for regularization
             dL_dm = mean
             dL_dv = 0.5 * (np.exp(std) - 1)
-            encoder_loss_error = np.concatenate(dL_dm, dL_dv)
+            encoder_loss_error = np.concatenate((dL_dm, dL_dv), axis=1)
             encoder_loss_gradients, _ = self._encoder.backpropagation(encoder_loss_error)
 
             # NOTE: update weights with gradients
             encoder_gradients = []
             for g1, g2 in zip(encoder_loss_gradients, encoder_reconstruction_gradients):
-                encoder_gradients.append(np.sum(g1, g2))
+                encoder_gradients.append(g1 + g2)
 
             self._encoder.update_weights(encoder_gradients, epoch)
             self._decoder.update_weights(decoder_gradients, epoch)

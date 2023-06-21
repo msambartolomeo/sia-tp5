@@ -41,7 +41,8 @@ class VariationalAutoencoder:
         self._decoder = MultiLayerPerceptron(decoder_architecture, epochs, cut_condition, activation_method,
                                              copy.deepcopy(optimization_method))
 
-    def train(self, data):
+    def train(self, data: ndarray[float]) -> list[float]:
+        loss_history = []
         for epoch in tqdm(range(self._epochs)):
             # NOTE: Feedforward
             result = self._encoder.feedforward(data)
@@ -55,6 +56,7 @@ class VariationalAutoencoder:
 
             loss = loss_function(mean, std, data, result)
             # TODO: add cut condition (?)
+            loss_history.append(loss)
 
             # NOTE: Decoder Backpropagation for reconstruction
             dL_dX = data - result
@@ -79,3 +81,5 @@ class VariationalAutoencoder:
 
             self._encoder.update_weights(encoder_gradients, epoch)
             self._decoder.update_weights(decoder_gradients, epoch)
+
+        return loss_history

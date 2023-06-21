@@ -1,14 +1,13 @@
 import numpy as np
 from tqdm import tqdm
 
-import utils
 from data.font import FONT
 from src.activation_method import TangentActivationFunction, StepActivationFunction
 from src.autoencoder import Autoencoder
-from src.cut_condition import OneWrongPixelCutCondition, FalseCutCondition
+from src.cut_condition import FalseCutCondition
 from src.optimization_method import AdamOptimization, MomentumOptimization
 from src.plot import plot_errors
-from src.plot_classes import MultiErrorVsEpochTestPlotter
+from utils import count_different_pixels
 
 # Configurations for the experiments
 CONFIGURATIONS = [
@@ -59,9 +58,6 @@ LATENT_DIMENSION = 2
 INPUT = np.array([[pixel for line in letter for pixel in line] for letter in FONT])
 INPUT_SIZE = INPUT.shape[1]  # 35
 
-
-def count_different_pixels(a, b) -> int:
-    return a.shape[0] - np.sum(a == b)
 
 def main():
     experiment_mean = []

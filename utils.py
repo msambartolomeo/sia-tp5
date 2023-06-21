@@ -102,3 +102,7 @@ def get_testing_size(settings) -> int:
 
 def get_architecture(settings) -> List[int]:
     return settings["architecture"]
+
+
+def count_different_pixels(a, b) -> int:
+    return a.shape[0] - np.sum(a == b)

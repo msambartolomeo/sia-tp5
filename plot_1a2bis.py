@@ -1,24 +1,49 @@
 import numpy as np
+from tqdm import tqdm
 
 import utils
 from data.font import FONT
 from src.activation_method import TangentActivationFunction, StepActivationFunction
 from src.autoencoder import Autoencoder
 from src.cut_condition import OneWrongPixelCutCondition, FalseCutCondition
-from src.optimization_method import AdamOptimization
+from src.optimization_method import AdamOptimization, MomentumOptimization
 from src.plot import plot_errors
 from src.plot_classes import MultiErrorVsEpochTestPlotter
 
 # Configurations for the experiments
 CONFIGURATIONS = [
     {
-        "name": "Tangent, Adam, [25, 25, 25, 25]",
+        "name": "Adam, [25, 25, 25, 25]",
         "activation_method": TangentActivationFunction(0.5),
         "optimization_method": AdamOptimization(),
         "inner_architecture": [25, 25, 25, 25],
     },
     {
-        "name": "Tangent, Adam, []",
+        "name": "Momentum, [25, 25, 25, 25]",
+        "activation_method": TangentActivationFunction(0.5),
+        "optimization_method": MomentumOptimization(),
+        "inner_architecture": [25, 25, 25, 25],
+    },
+    {
+        "name": "Adam, [25, 25, 25]",
+        "activation_method": TangentActivationFunction(0.5),
+        "optimization_method": AdamOptimization(),
+        "inner_architecture": [25, 25, 25],
+    },
+    {
+        "name": "Adam, [10, 10]",
+        "activation_method": TangentActivationFunction(0.5),
+        "optimization_method": AdamOptimization(),
+        "inner_architecture": [10, 10],
+    },
+    {
+        "name": "Adam, [18]",
+        "activation_method": TangentActivationFunction(0.5),
+        "optimization_method": AdamOptimization(),
+        "inner_architecture": [18],
+    },
+    {
+        "name": "Adam, []",
         "activation_method": TangentActivationFunction(0.5),
         "optimization_method": AdamOptimization(),
         "inner_architecture": [],
@@ -26,8 +51,8 @@ CONFIGURATIONS = [
 ]
 # Shared by all experiments
 CUT_CONDITION = FalseCutCondition()
-EPOCHS = 100000
-REPETITIONS = 10
+EPOCHS = 10000
+REPETITIONS = 5
 
 # Relative to the problem
 LATENT_DIMENSION = 2
@@ -44,7 +69,7 @@ def main():
 
     for configuration in CONFIGURATIONS:
         experiment_errors = []
-        for _ in range(REPETITIONS):
+        for _ in tqdm(range(REPETITIONS)):
             activation_method = configuration["activation_method"]
             optimization_method = configuration["optimization_method"]
             inner_architecture = configuration["inner_architecture"]
@@ -72,7 +97,7 @@ def main():
         experiment_mean.append(curr_mean)
         experiment_std.append(curr_std)
 
-    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder: Avg. of 5, full epoch count", "epoch", "Max. pixel difference")
+    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder(tanh(beta=0.5): Avg. of 5, full epoch count", "epoch", "Max. pixel difference")
 
 
 if __name__ == "__main__":

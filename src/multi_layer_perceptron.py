@@ -44,7 +44,7 @@ class MultiLayerPerceptron:
 
         return results
 
-    def feedforward(self, data):
+    def feedforward(self, data: ndarray[float]) -> ndarray[float]:
         self._feedforward_data = [data]
         results = data
         self._feedforward_output = []
@@ -59,7 +59,7 @@ class MultiLayerPerceptron:
 
         return results
 
-    def backpropagation(self, error):
+    def backpropagation(self, error: ndarray[float]) -> list[ndarray[float]]:
         derivatives = self._activation_function.d_evaluate(self._feedforward_data[-1])  # mu * output_size
         delta_i = error * derivatives  # mu * output_size, elemento a elemento
 

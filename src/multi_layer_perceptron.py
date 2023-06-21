@@ -59,7 +59,7 @@ class MultiLayerPerceptron:
 
         return results
 
-    def backpropagation(self, error: ndarray[float]) -> list[ndarray[float]]:
+    def backpropagation(self, error: ndarray[float]) -> tuple[list[ndarray[float]], ndarray[float]]:
         derivatives = self._activation_function.d_evaluate(self._feedforward_data[-1])  # mu * output_size
         delta_i = error * derivatives  # mu * output_size, elemento a elemento
 
@@ -82,7 +82,12 @@ class MultiLayerPerceptron:
             # Me libero del mu (estoy "sumando" todos los delta_w)
 
         gradients.reverse()
-        return gradients
+        return gradients, delta_i
+
+    def update_weights(self, gradients: list[ndarray[float]], epoch: int):
+        for i in range(len(self._layers)):
+            delta_w = self._optimization_method.adjust(gradients[i], i, epoch)
+            self._layers[i].neurons = np.add(self._layers[i].neurons, delta_w)
 
     def train_batch(self, data: ndarray[float], expected: ndarray[float]) -> list[ndarray[float]]:
         # #initial_data = mu x initial_size, #expected = mu x output_size
@@ -96,12 +101,10 @@ class MultiLayerPerceptron:
             if self._cut_condition.is_finished(error):
                 break
 
-            gradients = self.backpropagation(error)
+            gradients, _ = self.backpropagation(error)
 
             # Calculo w = w + dw
-            for i in range(len(self._layers)):
-                delta_w = self._optimization_method.adjust(gradients[i], i, epoch)
-                self._layers[i].neurons = np.add(self._layers[i].neurons, delta_w)
+            self.update_weights(gradients, epoch)
 
         return error_history
 

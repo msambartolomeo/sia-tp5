@@ -95,6 +95,7 @@ def add_noise(number: ndarray[float], noise) -> ndarray[float]:
         noisy.append(np.random.normal(loc=number[i], scale=noise))
     return np.array(noisy)
 
+
 def get_testing_size(settings) -> int:
     return settings["testing_size"]
 

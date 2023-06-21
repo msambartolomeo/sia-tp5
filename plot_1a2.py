@@ -63,7 +63,6 @@ def main():
         experiment_mean.append(curr_mean)
         experiment_std.append(curr_std)
 
-    print([conf["name"] for conf in CONFIGURATIONS])
     plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder: Avg. of 5, full epoch count", "epoch", "MSE(e)")
 
 

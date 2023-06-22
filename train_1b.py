@@ -35,7 +35,6 @@ def main():
     ans = ae.predict(NOISY_INPUT_TEST)
     ans = StepActivationFunction().evaluate(ans)
 
-
     for test in range(INPUT.shape[0]):
         count = 0
         for i in range(len(ans[test])):

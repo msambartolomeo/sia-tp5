@@ -5,7 +5,7 @@ from src.variational_autoencoder import VariationalAutoencoder
 
 LATENT_DIMENSION = 2
 
-INPUT = input.parse_font("data/font.h")[:10, :]
+INPUT = input.parse_font("data/font.h")
 INPUT_SIZE = INPUT.shape[1]  # 35
 
 

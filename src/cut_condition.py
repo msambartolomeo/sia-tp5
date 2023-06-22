@@ -37,7 +37,7 @@ class MSECutCondition(CutCondition):
 class OneWrongPixelCutCondition(CutCondition):
     def is_finished(self, errors: ndarray[float]) -> bool:
         for row in errors:
-            if len(row) - np.count_nonzero(np.isclose(row, 0, atol=0.001)) > 1:
+            if len(row) - np.count_nonzero(np.isclose(row, 0, atol=0.01)) > 1:
                 return False
 
         return True

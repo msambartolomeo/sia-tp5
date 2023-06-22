@@ -92,8 +92,10 @@ class MultiLayerPerceptron:
     def train_batch(self, data: ndarray[float], expected: ndarray[float]) -> list[ndarray[float]]:
         # #initial_data = mu x initial_size, #expected = mu x output_size
         error_history = []
+
         for epoch in tqdm(range(self._epochs)):
             results = self.feedforward(data)
+
 
             error = expected - results  # mu * output_size
             # ver calculo del error con llamando a d_error #

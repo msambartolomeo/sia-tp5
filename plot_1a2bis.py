@@ -1,13 +1,13 @@
 import numpy as np
+from tqdm import tqdm
 
-import utils
 from data.font import FONT
-from src.activation_method import TangentActivationFunction
+from src.activation_method import TangentActivationFunction, StepActivationFunction
 from src.autoencoder import Autoencoder
-from src.cut_condition import OneWrongPixelCutCondition, FalseCutCondition
+from src.cut_condition import FalseCutCondition
 from src.optimization_method import AdamOptimization, MomentumOptimization
 from src.plot import plot_errors
-from src.plot_classes import MultiErrorVsEpochTestPlotter
+from utils import count_different_pixels
 
 # Configurations for the experiments
 CONFIGURATIONS = [
@@ -65,7 +65,7 @@ def main():
 
     for configuration in CONFIGURATIONS:
         experiment_errors = []
-        for _ in range(REPETITIONS):
+        for _ in tqdm(range(REPETITIONS)):
             activation_method = configuration["activation_method"]
             optimization_method = configuration["optimization_method"]
             inner_architecture = configuration["inner_architecture"]
@@ -73,11 +73,17 @@ def main():
                 INPUT_SIZE]
 
             ae = Autoencoder(architecture,
-                             EPOCHS,
+                             1,
                              CUT_CONDITION,
                              activation_method,
                              optimization_method)
-            error_history = ae.train_batch(INPUT, INPUT)
+            error_history = []
+            for _ in range(EPOCHS):
+                ae.train_batch(INPUT, INPUT)
+                prediction = ae.predict(INPUT)
+                prediction = StepActivationFunction().evaluate(prediction)
+                max_error = max([count_different_pixels(prediction[letter], INPUT[letter]) for letter in range(prediction.shape[0])])
+                error_history.append(max_error)
             experiment_errors.append(error_history)
         curr_mean = []
         curr_std = []
@@ -87,7 +93,7 @@ def main():
         experiment_mean.append(curr_mean)
         experiment_std.append(curr_std)
 
-    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder(tanh(beta=0.5)): avg. of 5, full epoch count", "epoch", "MSE(e)")
+    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder(tanh(beta=0.5): Avg. of 5, full epoch count", "epoch", "Max. pixel difference")
 
 
 if __name__ == "__main__":

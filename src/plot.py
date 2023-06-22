@@ -14,7 +14,7 @@ if not os.path.exists(OUTPUT_DIR):
     os.mkdir(OUTPUT_DIR)
 
 
-def plot_grid(data, grid = False):
+def plot_grid(data, grid=False, minor_width=3):
     fig, ax = plt.subplots()
     ax.spines[:].set_visible(False)
     if grid:
@@ -23,7 +23,7 @@ def plot_grid(data, grid = False):
     else:
         ax.set_xticks(np.arange(data.shape[1] + 1) - .5, minor=True)
         ax.set_yticks(np.arange(data.shape[0] + 1) - .5, minor=True)
-    ax.grid(which="minor", color="tab:gray", linestyle='-', linewidth=3)
+    ax.grid(which="minor", color="tab:gray", linestyle='-', linewidth=minor_width)
     ax.tick_params(which="minor", bottom=False, left=False)
     ax.tick_params(left=False, bottom=False)
     plt.style.use('grayscale')
@@ -50,6 +50,19 @@ def plot_font(data):
             aux[row][col] = pixel
 
     plot_grid(aux, grid=True)
+
+
+def plot_latent_grid(data, height, width):
+    row_count = LETTER_HEIGHT * height
+    col_count = LETTER_WIDTH * width
+    aux = np.zeros([row_count, col_count])
+    for row in range(row_count):
+        for col in range(col_count):
+            letter = data[col // LETTER_WIDTH + row // LETTER_HEIGHT * width]
+            pixel = letter[col % LETTER_WIDTH + (row % LETTER_HEIGHT) * LETTER_WIDTH]
+            aux[row][col] = pixel
+
+    plot_grid(aux, grid=True, minor_width=1)
 
 
 def plot_scatter(x, y, labels):
@@ -79,4 +92,25 @@ def plot_latent(vae, n=20, fig_size=15, digit_size=7):
     plt.xticks(pixel_range, sample_range_x)
     plt.yticks(pixel_range, sample_range_y)
     plt.imshow(figure, cmap="Greys_r")
+
+def plot_errors(mean, std, labels, title, xlabel, ylabel, x=None):
+    fig, ax = plt.subplots()
+    for i in range(len(mean)):
+        curr_mean = np.array(mean[i])
+        curr_std = np.array(std[i])
+        if x is None:
+            x = np.arange(curr_mean.shape[0])
+
+        ax.fill_between(x, curr_mean + curr_std, curr_mean - curr_std, alpha=.5, linewidth=0)
+        ax.plot(x, curr_mean, linewidth=2, label=labels[i])
+
+    leg = plt.legend(loc='upper right')
+    plt.title(title, fontsize=14)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid()
+    current_size = fig.get_size_inches()
+    new_size = (current_size[0] * 1.5, current_size[1] * 1.5)
+    fig.set_size_inches(new_size)
+    ax.set_position([0.1, 0.1, 0.8, 0.8])
     plt.show()

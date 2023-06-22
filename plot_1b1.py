@@ -4,10 +4,9 @@ import utils
 from data.font import FONT
 from src.activation_method import TangentActivationFunction
 from src.autoencoder import Autoencoder
-from src.cut_condition import OneWrongPixelCutCondition, FalseCutCondition
+from src.cut_condition import FalseCutCondition
 from src.optimization_method import AdamOptimization, MomentumOptimization
 from src.plot import plot_errors
-from src.plot_classes import MultiErrorVsEpochTestPlotter
 
 # Configurations for the experiments
 CONFIGURATIONS = [
@@ -52,11 +51,13 @@ CONFIGURATIONS = [
 CUT_CONDITION = FalseCutCondition()
 EPOCHS = 10000
 REPETITIONS = 5
+NOISE = 0.1
 
 # Relative to the problem
 LATENT_DIMENSION = 2
 INPUT = np.array([[pixel for line in letter for pixel in line] for letter in FONT])
 INPUT_SIZE = INPUT.shape[1]  # 35
+NOISY_INPUT = utils.add_noise(INPUT, NOISE)
 
 
 def main():
@@ -69,15 +70,16 @@ def main():
             activation_method = configuration["activation_method"]
             optimization_method = configuration["optimization_method"]
             inner_architecture = configuration["inner_architecture"]
-            architecture = [INPUT_SIZE] + inner_architecture + [LATENT_DIMENSION] + list(reversed(inner_architecture)) + [
-                INPUT_SIZE]
+            architecture = [INPUT_SIZE] + inner_architecture + [LATENT_DIMENSION] + list(
+                reversed(inner_architecture)) + [
+                               INPUT_SIZE]
 
             ae = Autoencoder(architecture,
                              EPOCHS,
                              CUT_CONDITION,
                              activation_method,
                              optimization_method)
-            error_history = ae.train_batch(INPUT, INPUT)
+            error_history = ae.train_batch(NOISY_INPUT, INPUT)
             experiment_errors.append(error_history)
         curr_mean = []
         curr_std = []
@@ -87,7 +89,8 @@ def main():
         experiment_mean.append(curr_mean)
         experiment_std.append(curr_std)
 
-    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS], "Configurations for autoencoder(tanh(beta=0.5)): avg. of 5, full epoch count", "epoch", "MSE(e)")
+    plot_errors(experiment_mean, experiment_std, [conf["name"] for conf in CONFIGURATIONS],
+                "Denoising autoencoders: Avg. of 5, full epoch count", "epoch", "MSE(e)")
 
 
 if __name__ == "__main__":

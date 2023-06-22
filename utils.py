@@ -2,6 +2,9 @@ import json
 import sys
 from typing import List
 
+import numpy as np
+from numpy import ndarray
+
 from src.activation_method import ActivationMethod, StepActivationFunction, LogisticActivationFunction, \
     TangentActivationFunction, IdentityActivationFunction, SigmoidActivationFunction
 from src.cut_condition import CutCondition, AccuracyCutCondition, AbsoluteValueCutCondition, MSECutCondition, \
@@ -86,9 +89,20 @@ def get_noise(settings) -> float:
     return settings["noise"]
 
 
+def add_noise(number: ndarray[float], noise) -> ndarray[float]:
+    noisy = []
+    for i in range(len(number)):
+        noisy.append(np.random.normal(loc=number[i], scale=noise))
+    return np.array(noisy)
+
+
 def get_testing_size(settings) -> int:
     return settings["testing_size"]
 
 
 def get_architecture(settings) -> List[int]:
     return settings["architecture"]
+
+
+def count_different_pixels(a, b) -> int:
+    return a.shape[0] - np.sum(a == b)

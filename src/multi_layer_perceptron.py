@@ -12,6 +12,10 @@ from src.layer import Layer
 from src.optimization_method import OptimizationMethod
 
 
+def gradient(delta: ndarray[float], data: ndarray[float]) -> ndarray[float]:
+    return - np.dot(data.T, delta)
+
+
 class MultiLayerPerceptron:
     def __init__(self, architecture: List[int], epochs: int, cut_condition: CutCondition,
                  activation_method: ActivationMethod, optimization_method: OptimizationMethod):
@@ -26,6 +30,9 @@ class MultiLayerPerceptron:
         for i in range(len(architecture) - 1):
             self._layers.append(Layer(np.random.uniform(-1, 1, (architecture[i] + 1, architecture[i + 1]))))
 
+        self._feedforward_data = []
+        self._feedforward_output = []
+
     def predict(self, data: ndarray[float]) -> ndarray[float]:
         results = data
         for i in range(len(self._layers)):
@@ -37,61 +44,69 @@ class MultiLayerPerceptron:
 
         return results
 
+    def feedforward(self, data: ndarray[float]) -> ndarray[float]:
+        self._feedforward_data = [data]
+        results = data
+        self._feedforward_output = []
+        for i in range(len(self._layers)):
+            results = np.insert(results, 0, 1, axis=1)
+            self._feedforward_output.append(results)
+            # results = mu x hidden_size + 1, #layers[i] = (hidden_size + 1) x next_hidden_size
+            h = np.dot(results, self._layers[i].neurons)
+            # h = mu x next_hidden_size
+            self._feedforward_data.append(h)
+            results = self._activation_function.evaluate(h)
+
+        return results
+
+    def backpropagation(self, error: ndarray[float]) -> tuple[list[ndarray[float]], ndarray[float]]:
+        derivatives = self._activation_function.d_evaluate(self._feedforward_data[-1])  # mu * output_size
+        delta_i = error * derivatives  # mu * output_size, elemento a elemento
+
+        # #delta_i = mu * output_size
+        # #feedforward_output[-1] = #hidden_data = mu * (hidden_size + 1)
+        gradients = [gradient(delta_i, self._feedforward_output[-1])]
+        # #gradients =  (#hidden_size + 1) * #output_size
+
+        for i in reversed(range(len(self._layers) - 1)):
+            # delta_w tiene que tener la suma de todos los delta_w para cada iteracion para ese peso
+            #        mu * output_size  *   ((hidden_size + 1 {bias_layer} - 1) * output_size).T
+            error = np.dot(delta_i, np.delete(self._layers[i + 1].neurons, 0, axis=0).T)
+            # mu * (hidden_size + 1 {bias_layer} - 1)  == mu * hidden_size
+
+            # Call _optimization_method #
+            derivatives = self._activation_function.d_evaluate(self._feedforward_data[i + 1])  # mu * hidden_size
+            delta_i = error * derivatives  # mu * hidden_size
+            # #feedforward[i] = mu * (previous_hidden_size + 1) ; delta_i = mu * hidden_size
+            gradients.append(gradient(delta_i, self._feedforward_output[i]))
+            # Me libero del mu (estoy "sumando" todos los delta_w)
+
+        gradients.reverse()
+        return gradients, delta_i
+
+    def update_weights(self, gradients: list[ndarray[float]], epoch: int):
+        for i in range(len(self._layers)):
+            delta_w = self._optimization_method.adjust(gradients[i], i, epoch)
+            self._layers[i].neurons = np.add(self._layers[i].neurons, delta_w)
+
     def train_batch(self, data: ndarray[float], expected: ndarray[float]) -> list[ndarray[float]]:
         # #initial_data = mu x initial_size, #expected = mu x output_size
         error_history = []
-        # for epoch in tqdm(range(self._epochs)):
-        for epoch in range(self._epochs):
-            # Feedforward ("predecir") for each layer.
-            # Le agrego al initial data los V = 1 para el bias
-            feedforward_data = [data]
-            results = data
-            feedforward_output = []
-            for i in range(len(self._layers)):
-                results = np.insert(results, 0, 1, axis=1)
-                feedforward_output.append(results)
-                # results = mu x hidden_size + 1, #layers[i] = (hidden_size + 1) x next_hidden_size
-                h = np.dot(results, self._layers[i].neurons)
-                # h = mu x next_hidden_size
-                feedforward_data.append(h)
-                results = self._activation_function.evaluate(h)
 
-            # Backpropagation using SGD
+        for epoch in tqdm(range(self._epochs)):
+            results = self.feedforward(data)
 
-            # Nos libramos del mu
-            delta_W = []
-            errors = expected - results  # mu * output_size
+
+            error = expected - results  # mu * output_size
             # ver calculo del error con llamando a d_error #
-
-            error_history.append(mse(errors))
-            if self._cut_condition.is_finished(errors):
+            error_history.append(mse(error))
+            if self._cut_condition.is_finished(error):
                 break
 
-            derivatives = self._activation_function.d_evaluate(feedforward_data[-1])  # mu * output_size
-            delta_i = errors * derivatives  # mu * output_size, elemento a elemento
-
-            # #delta_i = mu * output_size
-            # #feedforward_output[-1] = #hidden_data = mu * (hidden_size + 1)
-            delta_W.append(self._optimization_method.adjust(delta_i, feedforward_output[-1], len(feedforward_output) - 1, epoch))
-            # #delta_W =  (#hidden_size + 1) * #output_size
-
-            for i in reversed(range(len(self._layers) - 1)):
-                # delta_w tiene que tener la suma de todos los delta_w para cada iteracion para ese peso
-                #        mu * output_size  *   ((hidden_size + 1 {bias_layer} - 1) * output_size).T
-                error = np.dot(delta_i, np.delete(self._layers[i + 1].neurons, 0, axis=0).T)
-                # mu * (hidden_size + 1 {bias_layer} - 1)  == mu * hidden_size
-
-                # Call _optimization_method #
-                derivatives = self._activation_function.d_evaluate(feedforward_data[i + 1])  # mu * hidden_size
-                delta_i = error * derivatives  # mu * hidden_size
-                # #feedforward[i] = mu * (previous_hidden_size + 1) ; delta_i = mu * hidden_size
-                delta_W.append(self._optimization_method.adjust(delta_i, feedforward_output[i], i, epoch))
-                # Me libero del mu (estoy "sumando" todos los delta_w)
+            gradients, _ = self.backpropagation(error)
 
             # Calculo w = w + dw
-
-            for i in range(len(self._layers)):
-                self._layers[i].neurons = np.add(self._layers[i].neurons, delta_W[-(i + 1)])
+            self.update_weights(gradients, epoch)
 
         return error_history
 

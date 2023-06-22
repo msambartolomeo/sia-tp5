@@ -58,3 +58,25 @@ def plot_scatter(x, y, labels):
     for i in range(len(x)):
         ax.annotate(labels[i], (x[i], y[i]))
     plt.show()
+
+
+def plot_latent(vae, n=20, fig_size=15, digit_size=7):
+    figure = np.zeros((digit_size * n, digit_size * n))
+    grid_x = np.linspace(-1.0, 1.0, n)
+    grid_y = np.linspace(-1.0, 1.0, n)[::-1]
+    for i, yi in enumerate(grid_y):
+        for j, xi in enumerate(grid_x):
+            z = np.array([[xi, yi]])
+            output = vae.predict(z)
+            digit = output[0].reshape(digit_size, digit_size)
+            figure[i * digit_size: (i + 1) * digit_size, j * digit_size: (j + 1) * digit_size] = digit
+    plt.figure(figsize=(fig_size, fig_size))
+    start_range = digit_size // 2
+    end_range = n * digit_size + start_range
+    pixel_range = np.arange(start_range, end_range, digit_size)
+    sample_range_x = np.round(grid_x, 1)
+    sample_range_y = np.round(grid_y, 1)
+    plt.xticks(pixel_range, sample_range_x)
+    plt.yticks(pixel_range, sample_range_y)
+    plt.imshow(figure, cmap="Greys_r")
+    plt.show()

@@ -47,6 +47,8 @@ class VariationalAutoencoder:
                                              copy.deepcopy(optimization_method))
 
     def train(self, data: ndarray[float]) -> list[float]:
+        assert data.shape[1] == self._input_size
+
         loss_history = []
         for epoch in tqdm(range(self._epochs)):
             # NOTE: Feedforward
@@ -91,3 +93,8 @@ class VariationalAutoencoder:
             self._decoder.update_weights(decoder_gradients, epoch)
 
         return loss_history
+
+    def predict(self, z: ndarray[float]) -> ndarray[float]:
+        assert z.shape[1] == self._latent_size
+
+        return self._decoder.feedforward(z)

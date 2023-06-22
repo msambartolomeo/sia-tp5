@@ -15,7 +15,7 @@ def parse_font(path: str):
             for j in range(7):
                 l = int(hexs[j].strip("{ }"), 16)
 
-                for k in reversed(range(5)):
+                for k in reversed(range(7)):
                     pixel = (l >> k) & 1
                     pixel = -1 if pixel == 0 else 1
 

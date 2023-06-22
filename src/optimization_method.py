@@ -28,7 +28,7 @@ class MomentumOptimization(OptimizationMethod):
         self._prev = []
 
     def adjust(self, delta: ndarray[float], data: ndarray[float], index: int, _) -> ndarray[float]:
-        while index > len(self._prev):
+        while index >= len(self._prev):
             self._prev.append(0)
 
         self._prev[index] = self._learning_rate * np.dot(data.T, delta) + self._alpha * self._prev[index]
@@ -49,7 +49,7 @@ class AdamOptimization(OptimizationMethod):
     def adjust(self, delta: ndarray[float], data: ndarray[float], index: int, epoch: int) -> ndarray[float]:
         assert len(self._momentum) == len(self._rmsProp)
 
-        while index > len(self._momentum):
+        while index >= len(self._momentum):
             self._momentum.append(0)
             self._rmsProp.append(0)
 
@@ -57,7 +57,7 @@ class AdamOptimization(OptimizationMethod):
         self._momentum[index] = self._beta_1 * self._momentum[index] + (1 - self._beta_1) * gradient
         self._rmsProp[index] = self._beta_2 * self._rmsProp[index] + (1 - self._beta_2) * np.power(gradient, 2)
 
-        m = np.divide(self._momentum[index], 1 - self._beta_1 ** epoch)
-        v = np.divide(self._rmsProp[index], 1 - self._beta_2 ** epoch)
+        m = np.divide(self._momentum[index], 1 - self._beta_1 ** (epoch+1))
+        v = np.divide(self._rmsProp[index], 1 - self._beta_2 ** (epoch+1))
 
         return -self._alpha * np.divide(m, (np.sqrt(v) + self._epsilon))

@@ -40,7 +40,8 @@ class MultiLayerPerceptron:
     def train_batch(self, data: ndarray[float], expected: ndarray[float]) -> list[ndarray[float]]:
         # #initial_data = mu x initial_size, #expected = mu x output_size
         error_history = []
-        for epoch in tqdm(range(self._epochs)):
+        # for epoch in tqdm(range(self._epochs)):
+        for epoch in range(self._epochs):
             # Feedforward ("predecir") for each layer.
             # Le agrego al initial data los V = 1 para el bias
             feedforward_data = [data]

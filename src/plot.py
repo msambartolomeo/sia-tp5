@@ -73,12 +73,13 @@ def plot_scatter(x, y, labels):
     plt.show()
 
 
-def plot_errors(mean, std, labels, title, xlabel, ylabel):
+def plot_errors(mean, std, labels, title, xlabel, ylabel, x=None):
     fig, ax = plt.subplots()
     for i in range(len(mean)):
         curr_mean = np.array(mean[i])
         curr_std = np.array(std[i])
-        x = np.arange(curr_mean.shape[0])
+        if x is None:
+            x = np.arange(curr_mean.shape[0])
 
         ax.fill_between(x, curr_mean + curr_std, curr_mean - curr_std, alpha=.5, linewidth=0)
         ax.plot(x, curr_mean, linewidth=2, label=labels[i])

@@ -32,3 +32,12 @@ class MSECutCondition(CutCondition):
 
     def is_finished(self, errors) -> bool:
         return np.average(errors ** 2) < self._eps
+
+
+class OneWrongPixelCutCondition(CutCondition):
+    def is_finished(self, errors: ndarray[float]) -> bool:
+        for row in errors:
+            if len(row) - np.count_nonzero(np.isclose(row, 0, atol=0.01)) > 1:
+                return False
+
+        return True

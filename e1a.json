@@ -1,0 +1,20 @@
+{
+  "architecture": [25, 25, 25, 25],
+  "activation_function": {
+    "function": "tangent",
+    "beta": 0.5
+  },
+  "cut_condition": {
+    "condition": "one_wrong_pixel",
+    "eps": 0.001
+  },
+  "optimization_method": {
+    "method": "adam",
+    "learning_rate": 0.0001,
+    "alpha": 0.001,
+    "beta_1": 0.9,
+    "beta_2": 0.999,
+    "epsilon": 1e-8
+  },
+  "epochs": 1000000
+}
